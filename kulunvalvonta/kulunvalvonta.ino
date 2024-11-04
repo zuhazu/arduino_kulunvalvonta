@@ -39,6 +39,8 @@
 #include <MFRC522.h>
 #include <Wire.h>
 #include "rgb_lcd.h"
+#include <WiFi.h>
+
 
 rgb_lcd lcd;
 
@@ -50,21 +52,63 @@ const int colorB = 0;
 #define SS_PIN          10         // Configurable, see typical pin layout above
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+WiFiClient client;
+
+char ssid[] = "036-Wifi";
+char pass[] = "036luokka";
+int keyIndex = 0;
+int status = WL_IDLE_STATUS;
+
+char server[] = "www.google.com";
+
 
 void setup() {
 	Serial.begin(9600);		// Initialize serial communications with the PC
 	while (!Serial);		// Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
 	SPI.begin();			// Init SPI bus
-	mfrc522.PCD_Init();		// Init MFRC522
-	delay(4);				// Optional delay. Some board do need more time after init to be ready, see Readme
-	mfrc522.PCD_DumpVersionToSerial();	// Show details of PCD - MFRC522 Card Reader details
-	Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
-  // Print a message to the LCD.
-  lcd.begin(16, 2);
-  lcd.setRGB(colorR, colorG, colorB);
-  lcd.print("hyi");
+
+  initRFID();
+  initWifi();
+  initLCD();
   delay(1000);
 
+}
+
+void initLCD()
+{
+  lcd.begin(16, 2);
+  lcd.setRGB(colorR, colorG, colorB);
+  lcd.print("Jenninator");
+}
+
+void initRFID()
+{
+  mfrc522.PCD_Init();
+  mfrc522.PCD_DumpVersionToSerial();
+}
+
+void initWifi()
+{
+  if (WiFi.status() == WL_NO_SHIELD) 
+  {
+    Serial.println("WiFi kuori ei ole paikallaan");
+    while(true);
+  }
+
+  while(status != WL_CONNECTED){
+    Serial.print("Yritethään yhistää SSID: ");
+    Serial.println(ssid);
+    status = WiFi.begin(ssid, pass);
+
+    delay(5000);
+  }
+
+  Serial.println("Yhristetty");
+
+  if(client.connect(server, 80)) {
+    Serial.println("Yhristetty: ");
+    Serial.println(server);
+  } 
 }
 
 void loop() {
