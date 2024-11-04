@@ -62,7 +62,7 @@ void setup() {
   // Print a message to the LCD.
   lcd.begin(16, 2);
   lcd.setRGB(colorR, colorG, colorB);
-  lcd.print("hello, world!");
+  lcd.print("hyi");
   delay(1000);
 
 }
