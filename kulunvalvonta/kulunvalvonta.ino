@@ -1,3 +1,6 @@
+#include <HttpClient.h>
+#include <b64.h>
+
 /*
  * --------------------------------------------------------------------------------------------------------------------
  * Example sketch/program showing how to read data from a PICC to serial.
@@ -42,6 +45,7 @@
 #include <WiFi.h>
 
 
+
 rgb_lcd lcd;
 
 const int colorR = 255;
@@ -54,13 +58,15 @@ const int colorB = 0;
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 WiFiClient client;
 
+
+
 char ssid[] = "036-Wifi";
 char pass[] = "036luokka";
 int keyIndex = 0;
 int status = WL_IDLE_STATUS;
 
-char server[] = "www.google.com";
-
+//har server[] = "192.168.1.100";
+IPAddress server(192,168,1,100);
 
 void setup() {
 	Serial.begin(9600);		// Initialize serial communications with the PC
@@ -103,26 +109,82 @@ void initWifi()
     delay(5000);
   }
 
-  Serial.println("Yhristetty");
+  Serial.println("Yhristetty Wifiin");
+  
+  if (client.connect(server, 8080)) {
 
-  if(client.connect(server, 80)) {
-    Serial.println("Yhristetty: ");
+    Serial.println("connected to server:");
     Serial.println(server);
-  } 
+
+    // Make a HTTP request:
+
+    String request = "GET /data/15 HTTP/1.1\r\n";
+    request += "host: 192.168.1.100:8080\r\n";
+    request += "content-type: application/json\r\n";
+    request += "content-type: application/json\r\n";
+    //request += "accept: \\*/*\r\n";
+    request += "Connection: close\r\n";
+    client.print(request);
+
+    /*client.println("GET /data/15 HTTP/2");
+
+    client.println("Host: http://192.168.1.100");
+    client.println("Content-Type: application/json");
+    client.println("Accept: ");
+    client.println("Connection: close");
+
+*/
+    client.println();
+
+  }
 }
 
 void loop() {
 	// Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-	if ( ! mfrc522.PICC_IsNewCardPresent()) {
+	/*if ( ! mfrc522.PICC_IsNewCardPresent()) {
 		return;
 	}
 
 	// Select one of the cards
 	if ( ! mfrc522.PICC_ReadCardSerial()) {
 		return;
-	}
+	}*/
 
 	// Dump debug info about the card; PICC_HaltA() is automatically called
 	mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
-  
+  wifiLoop();
 }
+
+void wifiLoop() {
+   // if there are incoming bytes available
+
+  // from the server, read them and print them:
+
+  while (client.available()) {
+
+    char c = client.read();
+
+    Serial.write(c);
+
+  }
+
+  // if the server's disconnected, stop the client:
+
+  if (!client.connected()) {
+
+    Serial.println();
+
+    Serial.println("disconnecting from server.");
+
+    client.stop();
+
+    // do nothing forevermore:
+
+    while (true);
+
+  }
+}
+
+
+
+
