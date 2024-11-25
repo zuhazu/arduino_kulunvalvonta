@@ -245,13 +245,11 @@ void updateScreenColor(String body) {
     lcd.print("Logged in");
     tone(buzzerPin, 1200, 200);  // 1200 Hz taajuus 200 millisekunnin ajan
   } 
-  else if (body == "Access denied" || "Room not found") {
+  else if (body == "Access denied") {
     lcd.setRGB(255, 0, 0);  // Punainen väri (Access denied)
     lcd.setCursor(0, 0);
     lcd.print(body);
     tone(buzzerPin, 500, 200);  // 500 Hz taajuus 500 millisekunnin ajan
-    delay(300);
-    tone(buzzerPin, 500, 500);  // 500 Hz taajuus 500 millisekunnin ajan
     delay(300);
     tone(buzzerPin, 500, 500);  // 500 Hz taajuus 500 millisekunnin ajan
   } 
@@ -260,6 +258,14 @@ void updateScreenColor(String body) {
     lcd.setCursor(0, 0);
     lcd.print("Logged out");
     tone(buzzerPin, 400, 300);  // 400 Hz taajuus 300 millisekunnin ajan
+  }
+  else if (body == "Room not found") {
+    lcd.setRGB(255, 0, 0);  // Punainen väri (Room not found)
+    lcd.setCursor(0, 0);
+    lcd.print(body);
+    tone(buzzerPin, 300, 200);  // 500 Hz taajuus 500 millisekunnin ajan
+    delay(300);
+    tone(buzzerPin, 500, 500);  // 500 Hz taajuus 500 millisekunnin ajan
   }
 } 
 
